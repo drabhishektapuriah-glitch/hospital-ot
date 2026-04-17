@@ -1,0 +1,1866 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Dr. Organiser">
+<meta name="theme-color" content="#080F1E">
+<title>Dr. Organiser</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#080F1E; --bg2:#0D1929; --bg3:#112035; --bg4:#162844;
+  --border:#1A2F4A; --border2:#213A5C;
+  --text:#E2E8F0; --text2:#94A3B8; --text3:#64748B;
+  --accent:#0EA5E9; --warn:#F59E0B; --danger:#EF4444;
+  --success:#10B981; --purple:#8B5CF6; --cyan:#06B6D4;
+  --nav-h:64px; --safe-b:env(safe-area-inset-bottom,0px); --safe-t:env(safe-area-inset-top,0px);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html{font-size:16px;}
+body{
+  font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);
+  min-height:100dvh;
+  padding-bottom:calc(var(--nav-h) + var(--safe-b) + 70px);
+  padding-top:var(--safe-t);overflow-x:hidden;
+}
+::-webkit-scrollbar{width:3px;}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+
+/* HEADER */
+.hdr{
+  position:sticky;top:0;z-index:80;
+  background:rgba(8,15,30,.93);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+  border-bottom:1px solid var(--border);padding:12px 16px 10px;
+}
+.hdr-row{display:flex;align-items:center;justify-content:space-between;}
+.hdr-label{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;font-weight:600;}
+.hdr-date{font-size:11.5px;color:var(--text3);margin-top:1px;}
+.hdr-title{font-family:'DM Serif Display',serif;font-size:21px;color:var(--text);letter-spacing:-.3px;}
+.hdr-avatar{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#0EA5E9,#0369A1);display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0;}
+
+/* BOTTOM NAV */
+.bnav{
+  position:fixed;bottom:0;left:0;right:0;z-index:90;
+  background:rgba(11,20,36,.97);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border-top:1px solid var(--border);
+  display:flex;height:calc(var(--nav-h) + var(--safe-b));padding-bottom:var(--safe-b);
+}
+.nb{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:3px;border:none;background:none;color:var(--text3);
+  font-family:'DM Sans',sans-serif;font-size:10px;font-weight:500;cursor:pointer;
+  transition:color .15s;padding:4px 2px;letter-spacing:.1px;
+}
+.nb .ni{font-size:19px;transition:transform .15s;}
+.nb.active{color:var(--accent);}
+.nb.active .ni{transform:scale(1.1);}
+
+/* FAB */
+.fab{
+  position:fixed;bottom:calc(var(--nav-h) + var(--safe-b) + 14px);right:16px;z-index:75;
+  width:52px;height:52px;border-radius:16px;
+  background:linear-gradient(135deg,#0EA5E9,#0369A1);
+  color:#fff;font-size:26px;border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 6px 22px rgba(14,165,233,.4);transition:transform .15s;
+}
+.fab:active{transform:scale(.9);}
+
+/* VIEWS */
+.view{display:none;animation:fadeUp .2s ease;}
+.view.active{display:block;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+/* PAGE HEAD */
+.ph{padding:14px 16px 0;}
+.ph-label{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.7px;font-weight:600;margin-bottom:3px;}
+.ph-title{font-size:22px;font-weight:700;letter-spacing:-.4px;}
+.ph-sub{font-size:12px;color:var(--text2);margin-top:3px;}
+
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;padding:14px 16px 0;}
+.sc{background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:11px 8px;text-align:center;position:relative;overflow:hidden;}
+.sc::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+.sc[data-c="accent"]::before{background:var(--accent);}
+.sc[data-c="danger"]::before{background:var(--danger);}
+.sc[data-c="warn"]::before{background:var(--warn);}
+.sc[data-c="purple"]::before{background:var(--purple);}
+.sc[data-c="cyan"]::before{background:var(--cyan);}
+.sc[data-c="success"]::before{background:var(--success);}
+.sn{font-size:27px;font-weight:700;line-height:1;font-family:'DM Serif Display',serif;}
+.sn[data-c="accent"]{color:var(--accent);}
+.sn[data-c="danger"]{color:var(--danger);}
+.sn[data-c="warn"]{color:var(--warn);}
+.sn[data-c="purple"]{color:var(--purple);}
+.sn[data-c="cyan"]{color:var(--cyan);}
+.sn[data-c="success"]{color:var(--success);}
+.sl{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.3px;margin-top:4px;font-weight:600;line-height:1.3;}
+
+/* SECTION */
+.sec{padding:14px 16px 0;}
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.sec-lbl{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;}
+
+/* CARD */
+.card{background:var(--bg3);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:10px;}
+
+/* ALERT */
+.ai{border-radius:11px;padding:11px 13px;margin-bottom:8px;border-left:3px solid;}
+.ai.danger{background:rgba(239,68,68,.07);border-color:var(--danger);}
+.ai.warn{background:rgba(245,158,11,.07);border-color:var(--warn);}
+.ai.accent{background:rgba(14,165,233,.07);border-color:var(--accent);}
+.ai.purple{background:rgba(139,92,246,.07);border-color:var(--purple);}
+.ai.success{background:rgba(16,185,129,.07);border-color:var(--success);}
+.ai.cyan{background:rgba(6,182,212,.07);border-color:var(--cyan);}
+.ai.reschedule{background:rgba(245,158,11,.05);border-color:var(--warn);border-style:dashed;}
+.ai-title{font-size:13.5px;font-weight:600;color:var(--text);margin-bottom:3px;line-height:1.3;}
+.ai-sub{font-size:11.5px;color:var(--text2);line-height:1.5;}
+
+/* TASK ROW */
+.tr{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:13px;padding:13px 14px;margin-bottom:10px;
+  border-left:3px solid var(--border2);
+  transition:border-color .15s;
+}
+.tr.ph{border-left-color:var(--danger)!important;}
+.tr.pm{border-left-color:var(--warn);}
+.tr.pl{border-left-color:var(--success);}
+.tr.overdue{border-left-color:var(--danger)!important;background:rgba(239,68,68,.04);}
+.tr.rescheduled-row{border-left-color:var(--warn)!important;border-style:solid;background:rgba(245,158,11,.03);}
+.tr-name{font-size:14px;font-weight:600;color:var(--text);margin-bottom:5px;line-height:1.3;}
+.tr-meta{display:flex;flex-wrap:wrap;gap:8px;font-size:11.5px;color:var(--text2);}
+.tr-meta-i{display:flex;align-items:center;gap:3px;}
+.tr-actions{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:5px;border:none;border-radius:9px;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:600;transition:opacity .15s,transform .1s;-webkit-appearance:none;}
+.btn:active{transform:scale(.95);}
+.bp{background:var(--accent);color:#fff;font-size:14px;padding:12px 22px;}
+.bs{font-size:12px;padding:7px 12px;}
+.bg{background:rgba(255,255,255,.06);color:var(--text2);border:1px solid var(--border);}
+.bsuc{background:rgba(16,185,129,.14);color:var(--success);border:1px solid rgba(16,185,129,.25);}
+.bdng{background:rgba(239,68,68,.12);color:var(--danger);border:1px solid rgba(239,68,68,.2);}
+.bwrn{background:rgba(245,158,11,.12);color:var(--warn);border:1px solid rgba(245,158,11,.2);}
+.bacc{background:rgba(14,165,233,.12);color:var(--accent);border:1px solid rgba(14,165,233,.2);}
+.bpur{background:rgba(139,92,246,.12);color:var(--purple);border:1px solid rgba(139,92,246,.2);}
+.bfull{width:100%;justify-content:center;font-size:15px;padding:14px;}
+
+/* TAGS */
+.tag{display:inline-flex;align-items:center;font-size:10.5px;font-weight:700;border-radius:20px;padding:3px 8px;letter-spacing:.1px;}
+.td{background:rgba(239,68,68,.14);color:var(--danger);border:1px solid rgba(239,68,68,.2);}
+.tw{background:rgba(245,158,11,.14);color:var(--warn);border:1px solid rgba(245,158,11,.2);}
+.ta{background:rgba(14,165,233,.14);color:var(--accent);border:1px solid rgba(14,165,233,.2);}
+.ts{background:rgba(16,185,129,.14);color:var(--success);border:1px solid rgba(16,185,129,.2);}
+.tp{background:rgba(139,92,246,.14);color:var(--purple);border:1px solid rgba(139,92,246,.2);}
+.tc{background:rgba(6,182,212,.14);color:var(--cyan);border:1px solid rgba(6,182,212,.2);}
+.tm{background:rgba(100,116,139,.12);color:var(--text3);border:1px solid var(--border);}
+
+/* CHIPS */
+.chips{display:flex;gap:8px;padding:10px 16px 8px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+.chips::-webkit-scrollbar{display:none;}
+.chip{border:1.5px solid var(--border);background:var(--bg3);color:var(--text2);border-radius:20px;padding:7px 14px;font-size:12.5px;font-weight:500;white-space:nowrap;cursor:pointer;flex-shrink:0;font-family:'DM Sans',sans-serif;transition:all .15s;}
+.chip.active{background:rgba(14,165,233,.14);border-color:var(--accent);color:var(--accent);font-weight:700;}
+
+/* MODAL */
+.mo{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:200;display:none;align-items:flex-end;justify-content:center;}
+.mo.open{display:flex;animation:mfade .15s ease;}
+@keyframes mfade{from{opacity:0;}to{opacity:1;}}
+.mb{
+  background:var(--bg3);border:1px solid var(--border2);
+  border-radius:22px 22px 0 0;
+  width:100%;max-height:93dvh;overflow:hidden;
+  display:flex;flex-direction:column;
+  animation:sup .26s cubic-bezier(.32,1.05,.44,1);
+  padding-bottom:calc(18px + var(--safe-b));
+}
+@keyframes sup{from{transform:translateY(100%);}to{transform:translateY(0);}}
+.mh{width:36px;height:4px;background:var(--border2);border-radius:2px;margin:10px auto 0;flex-shrink:0;}
+.mhdr{display:flex;align-items:center;justify-content:space-between;padding:12px 18px 10px;border-bottom:1px solid var(--border);flex-shrink:0;}
+.mt{font-size:17px;font-weight:700;color:var(--text);}
+.mc{background:rgba(255,255,255,.07);border:none;color:var(--text2);font-size:18px;width:32px;height:32px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.mbody{padding:15px 18px;overflow-y:auto;flex:1;-webkit-overflow-scrolling:touch;}
+.mfooter{padding:8px 18px 0;flex-shrink:0;}
+
+/* FORM */
+.fg{margin-bottom:13px;}
+.fl{font-size:11px;color:var(--text2);font-weight:700;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:5px;}
+.fi{background:var(--bg2);border:1.5px solid var(--border);border-radius:10px;padding:12px 13px;font-size:16px;color:var(--text);width:100%;font-family:'DM Sans',sans-serif;-webkit-appearance:none;appearance:none;transition:border-color .15s;outline:none;}
+.fi:focus{border-color:var(--accent);}
+.fi::placeholder{color:var(--text3);}
+textarea.fi{resize:none;min-height:76px;line-height:1.5;}
+select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%2364748B' d='M0 0l5 6 5-6z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 13px center;padding-right:34px;}
+.fr2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+hr.div{border:none;border-top:1px solid var(--border);margin:12px 0;}
+
+/* UPDATES */
+.ue{background:var(--bg2);border-radius:9px;padding:9px 12px;margin-bottom:7px;border-left:2px solid var(--border2);}
+.ue.reschedule-log{border-left-color:var(--warn);}
+.ue-time{font-size:10px;color:var(--text3);margin-bottom:3px;}
+.ue-text{font-size:13px;color:var(--text2);}
+
+/* RESCHEDULE BADGE */
+.rs-badge{background:rgba(245,158,11,.12);color:var(--warn);font-size:10.5px;font-weight:700;border-radius:20px;padding:3px 8px;border:1px solid rgba(245,158,11,.25);display:inline-flex;align-items:center;gap:4px;}
+
+/* GROUP */
+.gc{background:var(--bg3);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:12px;}
+.ghdr{padding:13px 15px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--bg4);}
+.gn{font-size:15px;font-weight:700;}
+.gbody{padding:12px 15px;}
+
+/* EVENT */
+.ec{background:var(--bg3);border:1px solid var(--border);border-radius:14px;padding:14px 15px;margin-bottom:11px;border-left:4px solid;}
+.et{font-size:15px;font-weight:700;margin-bottom:5px;}
+.em{font-size:12px;color:var(--text2);display:flex;flex-wrap:wrap;gap:10px;align-items:center;}
+
+/* CALL */
+.cc{background:var(--bg3);border:1px solid var(--border);border-radius:14px;padding:14px 15px;margin-bottom:11px;}
+
+/* EMPTY */
+.empty{text-align:center;padding:36px 20px;color:var(--text3);font-size:14px;line-height:1.7;}
+.empty-ico{font-size:42px;display:block;margin-bottom:10px;}
+
+/* DONE SECTION */
+.done-hdr{display:flex;align-items:center;gap:8px;padding:6px 0 10px;cursor:pointer;color:var(--text3);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;}
+.done-items{display:none;}
+.done-items.open{display:block;}
+
+/* SYNC STATUS */
+.sync-dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0;}
+.sync-dot.ok{background:var(--success);}
+.sync-dot.syncing{background:var(--warn);animation:pulse 1s infinite;}
+.sync-dot.err{background:var(--danger);}
+.sync-dot.offline{background:var(--text3);}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
+.sync-bar{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text3);margin-top:5px;cursor:pointer;}
+
+/* SETUP SCREEN */
+.setup-screen{position:fixed;inset:0;background:var(--bg);z-index:500;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px;text-align:center;}
+.setup-screen.hidden{display:none;}
+.setup-logo{font-size:56px;margin-bottom:16px;}
+.setup-title{font-family:'DM Serif Display',serif;font-size:28px;color:var(--text);margin-bottom:8px;}
+.setup-sub{font-size:14px;color:var(--text2);line-height:1.7;margin-bottom:28px;max-width:340px;}
+.setup-step{background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:10px;text-align:left;width:100%;max-width:400px;}
+.setup-step-num{font-size:10px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px;}
+.setup-step-text{font-size:13px;color:var(--text2);line-height:1.5;}
+.setup-input-wrap{width:100%;max-width:400px;margin:18px 0 10px;}
+
+/* NOTES */
+.note-card{background:var(--bg3);border:1px solid var(--border);border-radius:14px;padding:15px;margin-bottom:12px;border-left:4px solid;cursor:pointer;transition:background .15s,transform .1s;}
+.note-card:active{transform:scale(.98);background:var(--bg4);}
+.note-card-title{font-size:15px;font-weight:700;color:var(--text);margin-bottom:5px;}
+.note-card-preview{font-size:12.5px;color:var(--text3);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.note-card-meta{display:flex;align-items:center;gap:10px;font-size:11px;color:var(--text3);margin-top:8px;}
+.note-detail{display:none;animation:fadeUp .2s ease;}
+.note-detail.open{display:block;}
+.note-index{animation:fadeUp .15s ease;}
+.note-page-block{background:var(--bg2);border:1px solid var(--border);border-radius:13px;padding:16px;margin-bottom:14px;}
+.note-page-heading{font-size:16px;font-weight:700;color:var(--text);margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.note-page-content{font-size:14px;color:var(--text2);line-height:1.8;white-space:pre-wrap;word-break:break-word;}
+.note-color-btn{width:28px;height:28px;border-radius:50%;border:2px solid transparent;cursor:pointer;flex-shrink:0;transition:transform .1s;}
+.note-color-btn.sel{border-color:#fff;transform:scale(1.15);}
+/* 6-tab nav tweak */
+.nb{font-size:9.5px;}
+
+@media(min-width:580px){
+  .mb{max-width:520px;margin:auto;border-radius:22px;margin-bottom:32px;}
+  .mo{align-items:center;}
+  .stats{grid-template-columns:repeat(6,1fr);}
+  .nb{font-size:10px;}
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="hdr">
+  <div class="hdr-row">
+    <div>
+      <div class="hdr-label" id="greet">Good Morning, Doctor</div>
+      <div class="hdr-date" id="hdrDate"></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div class="sync-bar" onclick="manualSync()" title="Tap to sync">
+        <span class="sync-dot offline" id="syncDot"></span>
+        <span id="syncLabel">Not connected</span>
+      </div>
+      <div class="hdr-avatar">👨‍⚕️</div>
+    </div>
+  </div>
+</div>
+
+<!-- SETUP SCREEN -->
+<div class="setup-screen" id="setupScreen">
+  <div class="setup-logo">👨‍⚕️</div>
+  <div class="setup-title">Dr. Organiser</div>
+  <div class="setup-sub">Connect your Google Sheet to sync data across all your devices — iPhone, iPad, laptop, anywhere.</div>
+
+  <div class="setup-step" style="max-width:400px;width:100%;">
+    <div class="setup-step-num">Step 1 — Create the backend (one time only)</div>
+    <div class="setup-step-text">
+      1. Go to <strong style="color:var(--accent);">script.google.com</strong><br>
+      2. New project → paste the <strong>Code.gs</strong> file contents<br>
+      3. Deploy → New deployment → <strong>Web App</strong><br>
+      4. Execute as: <strong>Me</strong> · Who has access: <strong>Anyone</strong><br>
+      5. Copy the <strong>Web App URL</strong>
+    </div>
+  </div>
+
+  <div class="setup-input-wrap">
+    <label class="fl" style="text-align:left;display:block;margin-bottom:6px;">Paste your Web App URL here *</label>
+    <input class="fi" id="setupUrl" placeholder="https://script.google.com/macros/s/…/exec" style="font-size:13px;">
+    <div style="font-size:11.5px;color:var(--text3);margin-top:6px;line-height:1.5;">Your URL stays on your device only. Data goes directly to your own Google Sheet.</div>
+  </div>
+  <button class="btn bp" style="width:100%;max-width:400px;font-size:15px;padding:14px;" onclick="connectSheet()">Connect & Start →</button>
+  <button class="btn" style="background:none;border:none;color:var(--text3);font-size:13px;margin-top:14px;cursor:pointer;" onclick="skipSetup()">Use offline only (no sync)</button>
+</div>
+
+<!-- ════ VIEWS ════ -->
+<div class="view active" id="view-dash">
+  <div class="stats" id="dStats"></div>
+  <div class="sec" id="dContent"></div>
+</div>
+
+<div class="view" id="view-tasks">
+  <div class="ph" style="padding-bottom:0;">
+    <div class="ph-label">Work Management</div>
+    <div class="ph-title">Tasks & Works</div>
+    <div class="ph-sub" id="tSub"></div>
+  </div>
+  <div class="chips" id="tChips"></div>
+  <div class="sec" id="tList"></div>
+</div>
+
+<div class="view" id="view-groups">
+  <div class="ph"><div class="ph-label">Organisation</div><div class="ph-title">Project Groups</div><div class="ph-sub">Master groups with assigned sub-tasks</div></div>
+  <div class="sec" id="gList"></div>
+</div>
+
+<div class="view" id="view-events">
+  <div class="ph"><div class="ph-label">Calendar</div><div class="ph-title">Events & Schedule</div><div class="ph-sub" id="eSub"></div></div>
+  <div class="sec" id="eList"></div>
+</div>
+
+<div class="view" id="view-calls">
+  <div class="ph"><div class="ph-label">Communication</div><div class="ph-title">Calls to Make</div><div class="ph-sub" id="cSub"></div></div>
+  <div class="sec" id="cList"></div>
+</div>
+
+<!-- ════ NOTES VIEW ════ -->
+<div class="view" id="view-notes">
+  <!-- INDEX (shown by default) -->
+  <div id="notesIndex">
+    <div class="ph" style="padding-bottom:14px;">
+      <div class="ph-label">Reference</div>
+      <div class="ph-title">Notes</div>
+      <div class="ph-sub" id="notesSub">Your important notes & reference pages</div>
+    </div>
+    <div class="sec">
+      <div style="display:flex;justify-content:flex-end;margin-bottom:12px;">
+        <button class="btn bs bp" onclick="openNewNoteModal()">＋ New Note</button>
+      </div>
+      <div id="notesIndexList"></div>
+    </div>
+  </div>
+  <!-- DETAIL (shown when note is open) -->
+  <div id="noteDetail" class="note-detail">
+    <!-- populated by JS -->
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bnav">
+  <button class="nb active" onclick="go('dash',this)"><span class="ni">⬛</span>Dashboard</button>
+  <button class="nb" onclick="go('tasks',this)"><span class="ni">✅</span>Tasks</button>
+  <button class="nb" onclick="go('groups',this)"><span class="ni">📁</span>Groups</button>
+  <button class="nb" onclick="go('events',this)"><span class="ni">📅</span>Events</button>
+  <button class="nb" onclick="go('calls',this)"><span class="ni">📞</span>Calls</button>
+  <button class="nb" onclick="go('notes',this)"><span class="ni">📝</span>Notes</button>
+</nav>
+<button class="fab" id="fab" onclick="openAdd()">＋</button>
+
+<!-- ════ MODAL: TASK ════ -->
+<div class="mo" id="m-task">
+  <div class="mb">
+    <div class="mh"></div>
+    <div class="mhdr"><span class="mt" id="mTaskTitle">Add Task</span><button class="mc" onclick="closeM('task')">✕</button></div>
+    <div class="mbody">
+      <input type="hidden" id="tEditId">
+      <div class="fg"><label class="fl">Task / Work Description *</label><input class="fi" id="tTitle" placeholder="Describe the work to be done" autocomplete="off"></div>
+      <div class="fr2">
+        <div class="fg"><label class="fl">Master Group</label>
+          <select class="fi" id="tGroup"><option value="">— No Group —</option></select>
+        </div>
+        <div class="fg"><label class="fl">Priority</label>
+          <select class="fi" id="tPriority">
+            <option value="high">🔴 High</option>
+            <option value="medium" selected>🟡 Medium</option>
+            <option value="low">🟢 Low</option>
+          </select>
+        </div>
+      </div>
+      <div class="fg"><label class="fl">Assigned To *</label>
+        <input class="fi" id="tAssigned" placeholder="Responsible person's name" autocomplete="off" list="peopleList">
+        <datalist id="peopleList"></datalist>
+      </div>
+      <div class="fr2">
+        <div class="fg"><label class="fl">Due Date *</label><input type="date" class="fi" id="tDue"></div>
+        <div class="fg"><label class="fl">Reminder Date</label><input type="date" class="fi" id="tReminder"></div>
+      </div>
+      <div class="fg"><label class="fl">Notes / Instructions</label><textarea class="fi" id="tNotes" placeholder="Additional context or instructions…"></textarea></div>
+    </div>
+    <div class="mfooter">
+      <button class="btn bp bfull" onclick="saveTask()">Save Task</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ MODAL: RESCHEDULE ════ -->
+<div class="mo" id="m-reschedule">
+  <div class="mb">
+    <div class="mh"></div>
+    <div class="mhdr"><span class="mt">📅 Reschedule Task</span><button class="mc" onclick="closeM('reschedule')">✕</button></div>
+    <div class="mbody">
+      <input type="hidden" id="rsTaskId">
+      <div style="background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.2);border-radius:10px;padding:11px 13px;margin-bottom:14px;font-size:13px;color:var(--warn);line-height:1.5;">
+        ⚠️ This task will be moved to a new target date. A reschedule note will be logged automatically.
+      </div>
+      <div class="fg"><label class="fl">Current Task</label><div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:11px 13px;font-size:14px;font-weight:600;" id="rsTaskName"></div></div>
+      <div class="fg"><label class="fl">Current Due Date</label><div style="font-size:13px;color:var(--text2);padding:4px 0;" id="rsCurrentDate"></div></div>
+      <div class="fg"><label class="fl">New Target Date *</label><input type="date" class="fi" id="rsNewDate"></div>
+      <div class="fg"><label class="fl">Reason for Rescheduling</label><textarea class="fi" id="rsReason" placeholder="e.g. Patient emergency, awaiting lab results, unavailable…" style="min-height:70px;"></textarea></div>
+    </div>
+    <div class="mfooter">
+      <button class="btn bwrn bfull bs" style="font-size:15px;padding:14px;" onclick="confirmReschedule()">📅 Confirm Reschedule</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ MODAL: UPDATES ════ -->
+<div class="mo" id="m-updates">
+  <div class="mb">
+    <div class="mh"></div>
+    <div class="mhdr"><span class="mt">💬 Task Updates</span><button class="mc" onclick="closeM('updates')">✕</button></div>
+    <div class="mbody">
+      <input type="hidden" id="upTaskId">
+      <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);" id="upTaskName"></div>
+      <div id="upLog" style="max-height:220px;overflow-y:auto;margin-bottom:12px;"></div>
+      <hr class="div">
+      <div class="fg"><label class="fl">Add Update / Progress Note</label><textarea class="fi" id="upText" placeholder="Write progress, status update, notes…" style="min-height:70px;"></textarea></div>
+    </div>
+    <div class="mfooter">
+      <button class="btn bp bfull" onclick="saveUpdate()">Add Update</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ MODAL: GROUP ════ -->
+<div class="mo" id="m-group">
+  <div class="mb">
+    <div class="mh"></div>
+    <div class="mhdr"><span class="mt" id="mGroupTitle">New Project Group</span><button class="mc" onclick="closeM('group')">✕</button></div>
+    <div class="mbody">
+      <input type="hidden" id="gEditId">
+      <div class="fg"><label class="fl">Group / Project Name *</label><input class="fi" id="gName" placeholder="e.g. OT Prep, Research Paper, Ward Audit" autocomplete="off"></div>
+      <div class="fg"><label class="fl">Description</label><textarea class="fi" id="gDesc" placeholder="Brief description of what this group covers…"></textarea></div>
+    </div>
+    <div class="mfooter">
+      <button class="btn bp bfull" onclick="saveGroup()">Save Group</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ MODAL: EVENT ════ -->
+<div class="mo" id="m-event">
+  <div class="mb">
+    <div class="mh"></div>
+    <div class="mhdr"><span class="mt" id="mEvtTitle">Add Event</span><button class="mc" onclick="closeM('event')">✕</button></div>
+    <div class="mbody">
+      <input type="hidden" id="eEditId">
+      <div class="fg"><label class="fl">Event Title *</label><input class="fi" id="eTitle" placeholder="e.g. CME Conference, Board Meeting, OT List" autocomplete="off"></div>
+      <div class="fr2">
+        <div class="fg"><label class="fl">Type</label>
+          <select class="fi" id="eType">
+            <option value="conference">🎓 Conference/CME</option>
+            <option value="meeting">🤝 Meeting</option>
+            <option value="surgery">🏥 Surgery/OT</option>
+            <option value="visit">🏨 Hospital Visit</option>
+            <option value="deadline">📋 Deadline</option>
+            <option value="personal">👤 Personal</option>
+          </select>
+        </div>
+        <div class="fg"><label class="fl">Date *</label><input type="date" class="fi" id="eDate"></div>
+      </div>
+      <div class="fr2">
+        <div class="fg"><label class="fl">Time *</label><input type="time" class="fi" id="eTime"></div>
+        <div class="fg"><label class="fl">Location</label><input class="fi" id="eLocation" placeholder="Venue / Room / Online" autocomplete="off"></div>
+      </div>
+      <div class="fg"><label class="fl">Notes / Agenda</label><textarea class="fi" id="eNotes" placeholder="Agenda, contacts, what to prepare…"></textarea></div>
+    </div>
+    <div class="mfooter">
+      <button class="btn bp bfull" onclick="saveEvent()">Save Event</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ MODAL: CALL ════ -->
+<div class="mo" id="m-call">
+  <div class="mb">
+    <div class="mh"></div>
+    <div class="mhdr"><span class="mt" id="mCallTitle">Schedule Call</span><button class="mc" onclick="closeM('call')">✕</button></div>
+    <div class="mbody">
+      <input type="hidden" id="cEditId">
+      <div class="fr2">
+        <div class="fg"><label class="fl">Contact Name *</label><input class="fi" id="cName" placeholder="Person to call" autocomplete="off"></div>
+        <div class="fg"><label class="fl">Phone / Extension</label><input class="fi" id="cPhone" placeholder="Number" autocomplete="off" type="tel"></div>
+      </div>
+      <div class="fg"><label class="fl">Purpose / Agenda *</label><input class="fi" id="cPurpose" placeholder="What is this call about?" autocomplete="off"></div>
+      <div class="fr2">
+        <div class="fg"><label class="fl">Date *</label><input type="date" class="fi" id="cDate"></div>
+        <div class="fg"><label class="fl">Time *</label><input type="time" class="fi" id="cTime"></div>
+      </div>
+      <div class="fg"><label class="fl">Notes</label><textarea class="fi" id="cNotes" placeholder="Points to discuss, documents needed…"></textarea></div>
+    </div>
+    <div class="mfooter">
+      <button class="btn bp bfull" onclick="saveCall()">Save Call</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ MODAL: ADD TYPE PICKER ════ -->
+<div class="mo" id="m-pick">
+  <div class="mb" style="max-height:auto;">
+    <div class="mh"></div>
+    <div class="mhdr"><span class="mt">What would you like to add?</span><button class="mc" onclick="closeM('pick')">✕</button></div>
+    <div class="mbody" style="padding-bottom:4px;">
+      <button class="btn bg bfull bs" style="font-size:14px;padding:15px;margin-bottom:10px;justify-content:flex-start;gap:14px;" onclick="closeM('pick');openTaskModal()">
+        <span style="font-size:22px;">✅</span><div style="text-align:left;"><div style="font-weight:700;color:var(--text);">Task / Work</div><div style="font-size:11.5px;color:var(--text3);font-weight:400;margin-top:2px;">Add a task with deadline, assigned person & reminders</div></div>
+      </button>
+      <button class="btn bg bfull bs" style="font-size:14px;padding:15px;margin-bottom:10px;justify-content:flex-start;gap:14px;" onclick="closeM('pick');openGroupModal()">
+        <span style="font-size:22px;">📁</span><div style="text-align:left;"><div style="font-weight:700;color:var(--text);">Project Group</div><div style="font-size:11.5px;color:var(--text3);font-weight:400;margin-top:2px;">Create a master group for multiple sub-tasks</div></div>
+      </button>
+      <button class="btn bg bfull bs" style="font-size:14px;padding:15px;margin-bottom:10px;justify-content:flex-start;gap:14px;" onclick="closeM('pick');openEventModal()">
+        <span style="font-size:22px;">📅</span><div style="text-align:left;"><div style="font-weight:700;color:var(--text);">Event</div><div style="font-size:11.5px;color:var(--text3);font-weight:400;margin-top:2px;">Conference, meeting, surgery or any scheduled event</div></div>
+      </button>
+      <button class="btn bg bfull bs" style="font-size:14px;padding:15px;margin-bottom:4px;justify-content:flex-start;gap:14px;" onclick="closeM('pick');openCallModal()">
+        <span style="font-size:22px;">📞</span><div style="text-align:left;"><div style="font-weight:700;color:var(--text);">Call</div><div style="font-size:11.5px;color:var(--text3);font-weight:400;margin-top:2px;">Schedule a call with name, purpose & time</div></div>
+      </button>
+      <button class="btn bg bfull bs" style="font-size:14px;padding:15px;margin-bottom:4px;justify-content:flex-start;gap:14px;" onclick="closeM('pick');openNewNoteModal()">
+        <span style="font-size:22px;">📝</span><div style="text-align:left;"><div style="font-weight:700;color:var(--text);">Note</div><div style="font-size:11.5px;color:var(--text3);font-weight:400;margin-top:2px;">Create a note with multiple pages & headings</div></div>
+      </button>
+      <hr style="border:none;border-top:1px solid var(--border);margin:6px 0;">
+      <button class="btn bg bfull bs" style="font-size:13px;padding:12px;margin-bottom:2px;justify-content:flex-start;gap:14px;opacity:.7;" onclick="closeM('pick');resetSheetUrl()">
+        <span style="font-size:18px;">🔗</span><div style="text-align:left;"><div style="font-weight:600;color:var(--text2);">Change Google Sheet URL</div><div style="font-size:11px;color:var(--text3);font-weight:400;margin-top:1px;">Reconnect to a different sheet</div></div>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ MODAL: NEW/EDIT NOTE ════ -->
+<div class="mo" id="m-note">
+  <div class="mb">
+    <div class="mh"></div>
+    <div class="mhdr"><span class="mt" id="mNoteTitle">New Note</span><button class="mc" onclick="closeM('note')">✕</button></div>
+    <div class="mbody">
+      <input type="hidden" id="nEditId">
+      <div class="fg"><label class="fl">Note Title *</label>
+        <input class="fi" id="nTitle" placeholder="e.g. Drug Protocols, Patient Guidelines, Lab Values" autocomplete="off">
+      </div>
+      <div class="fg"><label class="fl">Colour Label</label>
+        <div style="display:flex;gap:10px;padding:4px 0;" id="nColorRow">
+          <!-- populated by JS -->
+        </div>
+      </div>
+      <div class="fg"><label class="fl">Icon</label>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;padding:4px 0;" id="nIconRow">
+          <!-- populated by JS -->
+        </div>
+      </div>
+    </div>
+    <div class="mfooter">
+      <button class="btn bp bfull" onclick="saveNote()">Save Note</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ MODAL: ADD/EDIT PAGE ════ -->
+<div class="mo" id="m-page">
+  <div class="mb">
+    <div class="mh"></div>
+    <div class="mhdr"><span class="mt" id="mPageTitle">Add Page</span><button class="mc" onclick="closeM('page')">✕</button></div>
+    <div class="mbody">
+      <input type="hidden" id="pgNoteId">
+      <input type="hidden" id="pgEditId">
+      <div class="fg"><label class="fl">Page Heading *</label>
+        <input class="fi" id="pgHeading" placeholder="e.g. Dosage, Contraindications, Protocol Steps" autocomplete="off">
+      </div>
+      <div class="fg"><label class="fl">Content *</label>
+        <textarea class="fi" id="pgContent" placeholder="Write your notes here…&#10;&#10;You can use line breaks to organise content.&#10;Bullet style: start lines with • or -" style="min-height:220px;font-size:15px;line-height:1.8;"></textarea>
+      </div>
+    </div>
+    <div class="mfooter">
+      <button class="btn bp bfull" onclick="savePage()">Save Page</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ MODAL: CUSTOM CONFIRM ════ -->
+<div class="mo" id="m-confirm">
+  <div class="mb" style="max-height:auto;">
+    <div class="mh"></div>
+    <div class="mhdr"><span class="mt" id="cfTitle">Confirm</span><button class="mc" onclick="closeM('confirm')">✕</button></div>
+    <div class="mbody">
+      <div id="cfMsg" style="font-size:14px;color:var(--text2);line-height:1.6;padding:4px 0 10px;"></div>
+    </div>
+    <div class="mfooter" style="display:flex;gap:10px;padding:10px 18px 0;">
+      <button class="btn bg bfull bs" style="font-size:14px;padding:13px;" onclick="closeM('confirm')">Cancel</button>
+      <button class="btn bdng bfull bs" style="font-size:14px;padding:13px;" id="cfOkBtn">Yes, Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ MODAL: MANAGE PEOPLE ════ -->
+<div class="mo" id="m-people">
+  <div class="mb">
+    <div class="mh"></div>
+    <div class="mhdr"><span class="mt">👥 Manage Team</span><button class="mc" onclick="closeM('people')">✕</button></div>
+    <div class="mbody">
+      <div style="font-size:12.5px;color:var(--text2);margin-bottom:14px;line-height:1.5;">Names saved here appear as suggestions in the Assigned To field.</div>
+      <div class="fg" style="display:flex;gap:8px;">
+        <input class="fi" id="newPersonInput" placeholder="Enter name…" autocomplete="off" style="flex:1;">
+        <button class="btn bs bp" style="white-space:nowrap;flex-shrink:0;" onclick="addPerson()">＋ Add</button>
+      </div>
+      <div id="peopleListManage" style="margin-top:4px;"></div>
+    </div>
+    <div class="mfooter">
+      <button class="btn bp bfull" onclick="closeM('people')">Done</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════
+//  DATA & STORAGE
+// ══════════════════════════════════════
+const SK      = 'drorg_v3';
+const SK_URL  = 'drorg_api_url';
+const SK_MODE = 'drorg_mode';   // 'sheets' | 'offline'
+
+let D = {tasks:[], groups:[], events:[], calls:[], people:[], notes:[]};
+let API_URL   = localStorage.getItem(SK_URL) || '';
+let syncMode  = localStorage.getItem(SK_MODE) || '';   // blank = not yet set up
+let _saveTimer = null;
+let _lastSyncTs = 0;
+
+// ── Sync UI ───────────────────────────────────────────────────
+function setSyncStatus(state, label){
+  const dot   = document.getElementById('syncDot');
+  const lbl   = document.getElementById('syncLabel');
+  if(!dot||!lbl) return;
+  dot.className = 'sync-dot ' + state;
+  lbl.textContent = label;
+}
+
+// ── Load from localStorage cache immediately ──────────────────
+function loadLocal(){
+  try{
+    const s=localStorage.getItem(SK);
+    if(s){ D=JSON.parse(s); if(!D.people)D.people=[]; if(!D.notes)D.notes=[]; }
+  }catch(e){}
+}
+
+// ── Pull from Google Sheets ───────────────────────────────────
+async function pullFromSheets(){
+  if(!API_URL) return;
+  setSyncStatus('syncing','Syncing…');
+  try{
+    const r = await fetch(API_URL, {method:'GET', cache:'no-cache'});
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    const remote = await r.json();
+    if(remote && typeof remote === 'object'){
+      // Merge: remote is the source of truth
+      D = remote;
+      if(!D.people) D.people=[];
+      if(!D.notes)  D.notes=[];
+      // Write back to local cache
+      localStorage.setItem(SK, JSON.stringify(D));
+      _lastSyncTs = Date.now();
+      setSyncStatus('ok','Synced just now');
+      render();
+    }
+  }catch(e){
+    console.warn('Pull failed:', e);
+    setSyncStatus('err','Sync failed – tap to retry');
+  }
+}
+
+// ── Push to Google Sheets (debounced 1.2 s) ───────────────────
+function save(){
+  // Always write locally first so UI is instant
+  try{ localStorage.setItem(SK, JSON.stringify(D)); }catch(e){}
+  if(syncMode !== 'sheets' || !API_URL) return;
+  clearTimeout(_saveTimer);
+  setSyncStatus('syncing','Saving…');
+  _saveTimer = setTimeout(()=>_pushToSheets(), 1200);
+}
+
+async function _pushToSheets(){
+  try{
+    const r = await fetch(API_URL, {
+      method:'POST',
+      body: JSON.stringify(D)
+      // No Content-Type header → avoids CORS preflight on Apps Script
+    });
+    const j = await r.json();
+    if(j.ok){
+      _lastSyncTs = Date.now();
+      setSyncStatus('ok','Saved to Sheet ✓');
+    } else {
+      throw new Error(j.error||'Unknown error');
+    }
+  }catch(e){
+    console.warn('Push failed:', e);
+    setSyncStatus('err','Save failed – tap to retry');
+  }
+}
+
+// ── Manual sync (tap the dot) ────────────────────────────────
+async function manualSync(){
+  if(syncMode === 'sheets' && API_URL){
+    await pullFromSheets();
+  } else if(!syncMode){
+    document.getElementById('setupScreen').classList.remove('hidden');
+  }
+}
+
+// ── Setup screen ─────────────────────────────────────────────
+function connectSheet(){
+  const url = document.getElementById('setupUrl').value.trim();
+  if(!url || !url.includes('script.google.com')){
+    alert('Please paste a valid Google Apps Script Web App URL.');
+    return;
+  }
+  API_URL   = url;
+  syncMode  = 'sheets';
+  localStorage.setItem(SK_URL,  url);
+  localStorage.setItem(SK_MODE, 'sheets');
+  document.getElementById('setupScreen').classList.add('hidden');
+  setSyncStatus('syncing','Connecting…');
+  pullFromSheets();
+}
+function skipSetup(){
+  syncMode = 'offline';
+  localStorage.setItem(SK_MODE,'offline');
+  document.getElementById('setupScreen').classList.add('hidden');
+  setSyncStatus('offline','Offline mode');
+  render();
+}
+
+// ── Change Sheet URL (from settings) ────────────────────────
+function resetSheetUrl(){
+  localStorage.removeItem(SK_URL);
+  localStorage.removeItem(SK_MODE);
+  API_URL  = '';
+  syncMode = '';
+  document.getElementById('setupScreen').classList.remove('hidden');
+}
+
+// ── Boot sequence ────────────────────────────────────────────
+loadLocal();   // instant — render uses cached data
+
+// Decide whether to show setup screen or boot into app
+if(!syncMode){
+  // First time — show setup (but let render proceed behind it)
+} else if(syncMode === 'sheets'){
+  setSyncStatus('syncing','Connecting…');
+  pullFromSheets();   // async — will re-render when done
+} else {
+  setSyncStatus('offline','Offline mode');
+}
+// Hide setup if already configured
+if(syncMode){ document.getElementById('setupScreen').classList.add('hidden'); }
+
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+
+// ══════════════════════════════════════
+//  DATE UTILS
+// ══════════════════════════════════════
+function today(){return new Date().toISOString().split('T')[0];}
+function daysUntil(d){if(!d)return null;const a=new Date();a.setHours(0,0,0,0);const b=new Date(d);b.setHours(0,0,0,0);return Math.ceil((b-a)/86400000);}
+function isOverdue(d){const n=daysUntil(d);return n!==null&&n<0;}
+function isToday(d){return daysUntil(d)===0;}
+function isSoon(d){const n=daysUntil(d);return n!==null&&n>0&&n<=3;}
+
+function fmt(d){
+  if(!d)return '—';
+  const dt=new Date(d+'T00:00:00');
+  return dt.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+}
+function fmtT(t){
+  if(!t)return '';
+  const[h,m]=t.split(':');const hr=parseInt(h);
+  return `${hr%12||12}:${m} ${hr>=12?'PM':'AM'}`;
+}
+function fmtDiff(d){
+  const n=daysUntil(d);
+  if(n===null)return '';
+  if(n<0)return `${Math.abs(n)}d overdue`;
+  if(n===0)return 'Due today';
+  if(n===1)return 'Due tomorrow';
+  return `Due in ${n}d`;
+}
+
+// ══════════════════════════════════════
+//  NAVIGATION
+// ══════════════════════════════════════
+let curView='dash';
+function go(v,btn){
+  document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.nb').forEach(x=>x.classList.remove('active'));
+  document.getElementById('view-'+v).classList.add('active');
+  if(btn)btn.classList.add('active');
+  curView=v;
+  render();
+}
+
+// ══════════════════════════════════════
+//  MODALS
+// ══════════════════════════════════════
+function openM(id){document.getElementById('m-'+id).classList.add('open');}
+function closeM(id){document.getElementById('m-'+id).classList.remove('open');}
+
+// Close on overlay click
+document.querySelectorAll('.mo').forEach(m=>{
+  m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');});
+});
+
+function openAdd(){openM('pick');}
+
+function openTaskModal(prefillGroup){
+  document.getElementById('tEditId').value='';
+  document.getElementById('mTaskTitle').textContent='Add Task';
+  document.getElementById('tTitle').value='';
+  document.getElementById('tAssigned').value='';
+  document.getElementById('tDue').value='';
+  document.getElementById('tReminder').value='';
+  document.getElementById('tNotes').value='';
+  document.getElementById('tPriority').value='medium';
+  populateGroupSelect('tGroup', prefillGroup||'');
+  refreshPeopleDatalist();
+  openM('task');
+}
+function openEditTask(id){
+  const t=D.tasks.find(x=>x.id===id);if(!t)return;
+  document.getElementById('tEditId').value=id;
+  document.getElementById('mTaskTitle').textContent='Edit Task';
+  document.getElementById('tTitle').value=t.title||'';
+  document.getElementById('tAssigned').value=t.assigned||'';
+  document.getElementById('tDue').value=t.due||'';
+  document.getElementById('tReminder').value=t.reminder||'';
+  document.getElementById('tNotes').value=t.notes||'';
+  document.getElementById('tPriority').value=t.priority||'medium';
+  populateGroupSelect('tGroup', t.groupId||'');
+  openM('task');
+}
+function populateGroupSelect(selId, val){
+  const sel=document.getElementById(selId);
+  sel.innerHTML='<option value="">— No Group —</option>';
+  D.groups.forEach(g=>{
+    const o=document.createElement('option');
+    o.value=g.id;o.textContent=g.name;
+    if(g.id===val)o.selected=true;
+    sel.appendChild(o);
+  });
+}
+
+function openGroupModal(editId){
+  document.getElementById('gEditId').value=editId||'';
+  if(editId){
+    const g=D.groups.find(x=>x.id===editId);
+    document.getElementById('mGroupTitle').textContent='Edit Group';
+    document.getElementById('gName').value=g.name||'';
+    document.getElementById('gDesc').value=g.desc||'';
+  } else {
+    document.getElementById('mGroupTitle').textContent='New Project Group';
+    document.getElementById('gName').value='';
+    document.getElementById('gDesc').value='';
+  }
+  openM('group');
+}
+function openEventModal(editId){
+  document.getElementById('eEditId').value=editId||'';
+  if(editId){
+    const e=D.events.find(x=>x.id===editId);
+    document.getElementById('mEvtTitle').textContent='Edit Event';
+    document.getElementById('eTitle').value=e.title||'';
+    document.getElementById('eType').value=e.type||'conference';
+    document.getElementById('eDate').value=e.date||'';
+    document.getElementById('eTime').value=e.time||'';
+    document.getElementById('eLocation').value=e.location||'';
+    document.getElementById('eNotes').value=e.notes||'';
+  } else {
+    document.getElementById('mEvtTitle').textContent='Add Event';
+    ['eTitle','eDate','eTime','eLocation','eNotes'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('eType').value='conference';
+  }
+  openM('event');
+}
+function openCallModal(editId){
+  document.getElementById('cEditId').value=editId||'';
+  if(editId){
+    const c=D.calls.find(x=>x.id===editId);
+    document.getElementById('mCallTitle').textContent='Edit Call';
+    document.getElementById('cName').value=c.name||'';
+    document.getElementById('cPhone').value=c.phone||'';
+    document.getElementById('cPurpose').value=c.purpose||'';
+    document.getElementById('cDate').value=c.date||'';
+    document.getElementById('cTime').value=c.time||'';
+    document.getElementById('cNotes').value=c.notes||'';
+  } else {
+    document.getElementById('mCallTitle').textContent='Schedule Call';
+    ['cName','cPhone','cPurpose','cDate','cTime','cNotes'].forEach(id=>document.getElementById(id).value='');
+  }
+  openM('call');
+}
+function openReschedule(id){
+  const t=D.tasks.find(x=>x.id===id);if(!t)return;
+  document.getElementById('rsTaskId').value=id;
+  document.getElementById('rsTaskName').textContent=t.title;
+  document.getElementById('rsCurrentDate').textContent=t.due?`📅 ${fmt(t.due)}` + (isOverdue(t.due)?` (Overdue by ${Math.abs(daysUntil(t.due))} day${Math.abs(daysUntil(t.due))>1?'s':''})`:' '):'No due date set';
+  document.getElementById('rsNewDate').value='';
+  document.getElementById('rsReason').value='';
+  openM('reschedule');
+}
+function openUpdates(id){
+  const t=D.tasks.find(x=>x.id===id);if(!t)return;
+  document.getElementById('upTaskId').value=id;
+  document.getElementById('upTaskName').textContent=t.title;
+  document.getElementById('upText').value='';
+  renderUpdateLog(t);
+  openM('updates');
+}
+function renderUpdateLog(t){
+  const log=document.getElementById('upLog');
+  const updates=t.updates||[];
+  if(!updates.length){log.innerHTML='<div style="color:var(--text3);font-size:13px;padding:6px 0;">No updates yet.</div>';return;}
+  log.innerHTML=[...updates].reverse().map(u=>`
+    <div class="ue ${u.type==='reschedule'?'reschedule-log':''}">
+      <div class="ue-time">${new Date(u.at).toLocaleString('en-IN',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})}${u.type==='reschedule'?' · 📅 Reschedule':u.type==='done-partial'?' · ✅ Partial Done':''}</div>
+      <div class="ue-text">${u.text}</div>
+    </div>`).join('');
+}
+
+// ══════════════════════════════════════
+//  SAVE FUNCTIONS
+// ══════════════════════════════════════
+function saveTask(){
+  const id=document.getElementById('tEditId').value;
+  const title=document.getElementById('tTitle').value.trim();
+  const assigned=document.getElementById('tAssigned').value.trim();
+  const due=document.getElementById('tDue').value;
+  if(!title)return alert('Please enter a task description.');
+  if(!assigned)return alert('Please enter the assigned person.');
+  if(!due)return alert('Please select a due date.');
+  const data={
+    title,assigned,due,
+    groupId:document.getElementById('tGroup').value,
+    priority:document.getElementById('tPriority').value,
+    reminder:document.getElementById('tReminder').value,
+    notes:document.getElementById('tNotes').value.trim(),
+  };
+  if(id){
+    const idx=D.tasks.findIndex(x=>x.id===id);
+    if(idx>-1)D.tasks[idx]={...D.tasks[idx],...data};
+  } else {
+    D.tasks.push({id:uid(),status:'pending',updates:[],created:Date.now(),...data});
+  }
+  addPersonIfNew(assigned);
+  save();closeM('task');render();
+}
+function saveGroup(){
+  const id=document.getElementById('gEditId').value;
+  const name=document.getElementById('gName').value.trim();
+  if(!name)return alert('Please enter a group name.');
+  const data={name,desc:document.getElementById('gDesc').value.trim()};
+  if(id){
+    const idx=D.groups.findIndex(x=>x.id===id);
+    if(idx>-1)D.groups[idx]={...D.groups[idx],...data};
+  } else {
+    D.groups.push({id:uid(),created:Date.now(),...data});
+  }
+  save();closeM('group');render();
+}
+function saveEvent(){
+  const id=document.getElementById('eEditId').value;
+  const title=document.getElementById('eTitle').value.trim();
+  const date=document.getElementById('eDate').value;
+  const time=document.getElementById('eTime').value;
+  if(!title||!date||!time)return alert('Please fill in title, date and time.');
+  const data={
+    title,date,time,
+    type:document.getElementById('eType').value,
+    location:document.getElementById('eLocation').value.trim(),
+    notes:document.getElementById('eNotes').value.trim(),
+  };
+  if(id){
+    const idx=D.events.findIndex(x=>x.id===id);
+    if(idx>-1)D.events[idx]={...D.events[idx],...data};
+  } else {
+    D.events.push({id:uid(),created:Date.now(),...data});
+  }
+  save();closeM('event');render();
+}
+function saveCall(){
+  const id=document.getElementById('cEditId').value;
+  const name=document.getElementById('cName').value.trim();
+  const purpose=document.getElementById('cPurpose').value.trim();
+  const date=document.getElementById('cDate').value;
+  const time=document.getElementById('cTime').value;
+  if(!name||!purpose||!date||!time)return alert('Please fill in name, purpose, date and time.');
+  const data={
+    name,purpose,date,time,
+    phone:document.getElementById('cPhone').value.trim(),
+    notes:document.getElementById('cNotes').value.trim(),
+  };
+  if(id){
+    const idx=D.calls.findIndex(x=>x.id===id);
+    if(idx>-1)D.calls[idx]={...D.calls[idx],...data};
+  } else {
+    D.calls.push({id:uid(),status:'pending',created:Date.now(),...data});
+  }
+  save();closeM('call');render();
+}
+function saveUpdate(){
+  const id=document.getElementById('upTaskId').value;
+  const text=document.getElementById('upText').value.trim();
+  if(!text)return;
+  const t=D.tasks.find(x=>x.id===id);if(!t)return;
+  if(!t.updates)t.updates=[];
+  t.updates.push({text,at:Date.now(),type:'note'});
+  save();
+  document.getElementById('upText').value='';
+  renderUpdateLog(t);
+  render();
+}
+function confirmReschedule(){
+  const id=document.getElementById('rsTaskId').value;
+  const newDate=document.getElementById('rsNewDate').value;
+  const reason=document.getElementById('rsReason').value.trim();
+  if(!newDate)return alert('Please select a new date.');
+  const t=D.tasks.find(x=>x.id===id);if(!t)return;
+  const oldDate=t.due;
+  t.due=newDate;
+  t.rescheduled=true;
+  t.rescheduleCount=(t.rescheduleCount||0)+1;
+  if(!t.updates)t.updates=[];
+  t.updates.push({
+    text:`Rescheduled from ${fmt(oldDate)} → ${fmt(newDate)}${reason?' · Reason: '+reason:''}`,
+    at:Date.now(),type:'reschedule'
+  });
+  save();closeM('reschedule');render();
+}
+// ══════════════════════════════════════
+//  CUSTOM CONFIRM
+// ══════════════════════════════════════
+let _cfCallback=null;
+function cfm(title,msg,okLabel,okClass,fn){
+  _cfCallback=fn;
+  document.getElementById('cfTitle').textContent=title;
+  document.getElementById('cfMsg').textContent=msg;
+  const btn=document.getElementById('cfOkBtn');
+  btn.textContent=okLabel||'Confirm';
+  btn.className='btn bfull bs '+(okClass||'bdng');
+  btn.style.fontSize='14px';btn.style.padding='13px';
+  btn.onclick=()=>{closeM('confirm');if(_cfCallback)_cfCallback();};
+  openM('confirm');
+}
+
+// ══════════════════════════════════════
+//  PEOPLE / TEAM MANAGEMENT
+// ══════════════════════════════════════
+function refreshPeopleDatalist(){
+  const dl=document.getElementById('peopleList');
+  if(!dl)return;
+  dl.innerHTML=D.people.map(p=>`<option value="${esc(p)}">`).join('');
+}
+function addPersonIfNew(name){
+  if(!name)return;
+  const nm=name.trim();
+  if(nm&&!D.people.includes(nm)){D.people.push(nm);save();}
+  refreshPeopleDatalist();
+}
+function openPeopleModal(){
+  renderPeopleList();
+  openM('people');
+}
+function renderPeopleList(){
+  document.getElementById('peopleListManage').innerHTML=
+    D.people.length?D.people.map((p,i)=>`
+      <div style="display:flex;align-items:center;justify-content:space-between;background:var(--bg2);border:1px solid var(--border);border-radius:9px;padding:10px 13px;margin-bottom:7px;">
+        <span style="font-size:14px;">👤 ${esc(p)}</span>
+        <button class="btn bs bdng" style="font-size:11px;padding:5px 10px;" onclick="removePerson(${i})">Remove</button>
+      </div>`).join('')
+    :'<div style="color:var(--text3);font-size:13px;text-align:center;padding:16px 0;">No team members yet.</div>';
+}
+function addPerson(){
+  const v=document.getElementById('newPersonInput').value.trim();
+  if(!v)return;
+  if(!D.people.includes(v))D.people.push(v);
+  save();refreshPeopleDatalist();
+  document.getElementById('newPersonInput').value='';
+  renderPeopleList();
+}
+function removePerson(i){
+  D.people.splice(i,1);
+  save();refreshPeopleDatalist();
+  renderPeopleList();
+}
+
+function markTaskDone(id){
+  cfm('Mark as Done','This task will be removed from your list. Make sure it\'s fully complete.','✓ Mark Done','bsuc',()=>{
+    D.tasks=D.tasks.filter(x=>x.id!==id);
+    save();render();
+  });
+}
+function deleteTask(id){
+  cfm('Delete Task','This task will be permanently deleted.','Delete','bdng',()=>{
+    D.tasks=D.tasks.filter(x=>x.id!==id);
+    save();render();
+  });
+}
+function deleteEvent(id){
+  cfm('Remove Event','This event will be removed from your calendar.','Remove','bdng',()=>{
+    D.events=D.events.filter(x=>x.id!==id);
+    save();render();
+  });
+}
+function deleteGroup(id){
+  cfm('Delete Group','This group will be deleted. Tasks inside will become ungrouped.','Delete Group','bdng',()=>{
+    D.groups=D.groups.filter(x=>x.id!==id);
+    D.tasks=D.tasks.map(t=>t.groupId===id?{...t,groupId:''}:t);
+    save();render();
+  });
+}
+
+function markCallDone(id){
+  const c=D.calls.find(x=>x.id===id);
+  if(c){c.status='done';save();render();}
+}
+
+// ══════════════════════════════════════
+//  TASK FILTER STATE
+// ══════════════════════════════════════
+let tFilter='all';
+const BASE_FILTERS=[
+  {k:'all',    label:'All Pending'},
+  {k:'overdue',label:'🔴 Overdue'},
+  {k:'today',  label:'📅 Due Today'},
+  {k:'soon',   label:'⚡ Due Soon'},
+  {k:'rescheduled',label:'🔁 Rescheduled'},
+  {k:'grouped',label:'📁 Grouped'},
+];
+function getPersonFilters(){
+  // collect every unique assigned name from pending tasks
+  const names=[...new Set(
+    D.tasks.filter(t=>t.status!=='done'&&t.assigned)
+           .map(t=>t.assigned.trim())
+  )].sort();
+  return names.map(n=>({k:'person:'+n, label:'👤 '+n}));
+}
+function isPersonFilter(k){return k.startsWith('person:');}
+function personFromFilter(k){return k.replace('person:','');}
+
+// ══════════════════════════════════════
+//  PRIORITY / TYPE HELPERS
+// ══════════════════════════════════════
+const PRI_C={high:'danger',medium:'warn',low:'success'};
+const PRI_LB={high:'High',medium:'Medium',low:'Low'};
+const PRI_ROW={high:'ph',medium:'pm',low:'pl'};
+const EVT_C={conference:'#8B5CF6',meeting:'#0EA5E9',surgery:'#EF4444',visit:'#06B6D4',deadline:'#F59E0B',personal:'#10B981'};
+const EVT_IC={conference:'🎓',meeting:'🤝',surgery:'🏥',visit:'🏨',deadline:'📋',personal:'👤'};
+
+function tagHTML(cls,text){return `<span class="tag ${cls}">${text}</span>`;}
+function priorityTag(p){return tagHTML('t'+PRI_C[p]?.[0]||'m',`${p==='high'?'🔴':p==='medium'?'🟡':'🟢'} ${PRI_LB[p]||p}`);}
+
+// ══════════════════════════════════════
+//  RENDER ENGINE
+// ══════════════════════════════════════
+function render(){
+  updateHeader();
+  if(curView==='dash')renderDash();
+  else if(curView==='tasks')renderTasks();
+  else if(curView==='groups')renderGroups();
+  else if(curView==='events')renderEvents();
+  else if(curView==='calls')renderCalls();
+  else if(curView==='notes')renderNotes();
+}
+
+function updateHeader(){
+  const now=new Date();
+  const h=now.getHours();
+  const g=h<12?'Good Morning':'Good Afternoon';
+  document.getElementById('greet').textContent=g+', Doctor 👨‍⚕️';
+  document.getElementById('hdrDate').textContent=now.toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+}
+
+// ── DASHBOARD ──
+function renderDash(){
+  const td=today();
+  const pending=D.tasks.filter(t=>t.status!=='done');
+  const overdue=pending.filter(t=>isOverdue(t.due));
+  const dueToday=pending.filter(t=>isToday(t.due));
+  const dueSoon=pending.filter(t=>isSoon(t.due));
+  const rescheduled=pending.filter(t=>t.rescheduled);
+  const futureEvents=D.events.filter(e=>e.date>=td).sort((a,b)=>a.date.localeCompare(b.date));
+  const upcomingEvt=futureEvents.filter(e=>daysUntil(e.date)<=7);
+  const todayCalls=D.calls.filter(c=>c.date===td&&c.status!=='pending'?false:c.date===td&&c.status==='pending');
+
+  // stats
+  document.getElementById('dStats').innerHTML=[
+    {c:'danger',n:overdue.length,l:'Overdue'},
+    {c:'warn',n:dueToday.length,l:'Due Today'},
+    {c:'accent',n:pending.length,l:'Pending'},
+    {c:'purple',n:upcomingEvt.length,l:'Events (7d)'},
+    {c:'cyan',n:todayCalls.length,l:"Today's Calls"},
+    {c:'success',n:rescheduled.length,l:'Rescheduled'},
+  ].map(s=>`<div class="sc" data-c="${s.c}"><div class="sn" data-c="${s.c}">${s.n}</div><div class="sl">${s.l}</div></div>`).join('');
+
+  let html='';
+
+  // overdue
+  if(overdue.length){
+    html+=`<div class="card"><div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;">🔴 Overdue Tasks</div>`;
+    overdue.forEach(t=>{
+      html+=`<div class="ai danger">
+        <div class="ai-title">${esc(t.title)}</div>
+        <div class="ai-sub">${Math.abs(daysUntil(t.due))}d overdue · 👤 ${esc(t.assigned)}
+          ${t.rescheduled?` <span class="rs-badge">📅 Rescheduled ×${t.rescheduleCount||1}</span>`:''}
+        </div>
+        <div style="display:flex;gap:7px;margin-top:8px;flex-wrap:wrap;">
+          <button class="btn bs bwrn" onclick="openReschedule('${t.id}')">📅 Reschedule</button>
+          <button class="btn bs bacc" onclick="openUpdates('${t.id}')">💬 Update</button>
+          <button class="btn bs bsuc" onclick="markTaskDone('${t.id}')">✓ Done</button>
+        </div>
+      </div>`;
+    });
+    html+='</div>';
+  }
+
+  // due today
+  if(dueToday.length){
+    html+=`<div class="card"><div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;">📅 Due Today</div>`;
+    dueToday.forEach(t=>{
+      html+=`<div class="ai warn">
+        <div class="ai-title">${esc(t.title)}</div>
+        <div class="ai-sub">👤 ${esc(t.assigned)} · ${priorityTag(t.priority)}</div>
+        <div style="display:flex;gap:7px;margin-top:8px;flex-wrap:wrap;">
+          <button class="btn bs bwrn" onclick="openReschedule('${t.id}')">📅 Reschedule</button>
+          <button class="btn bs bacc" onclick="openUpdates('${t.id}')">💬 Update</button>
+          <button class="btn bs bsuc" onclick="markTaskDone('${t.id}')">✓ Done</button>
+        </div>
+      </div>`;
+    });
+    html+='</div>';
+  }
+
+  // rescheduled tasks
+  if(rescheduled.length){
+    html+=`<div class="card"><div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;">📅 Rescheduled Tasks</div>`;
+    rescheduled.forEach(t=>{
+      const over=isOverdue(t.due);
+      html+=`<div class="ai ${over?'danger':'warn'}" style="border-style:dashed;">
+        <div class="ai-title">${esc(t.title)} <span class="rs-badge">Moved ×${t.rescheduleCount||1}</span></div>
+        <div class="ai-sub">New date: <strong>${fmt(t.due)}</strong> · ${fmtDiff(t.due)} · 👤 ${esc(t.assigned)}</div>
+        <div style="display:flex;gap:7px;margin-top:8px;flex-wrap:wrap;">
+          <button class="btn bs bwrn" onclick="openReschedule('${t.id}')">📅 Reschedule Again</button>
+          <button class="btn bs bsuc" onclick="markTaskDone('${t.id}')">✓ Done</button>
+        </div>
+      </div>`;
+    });
+    html+='</div>';
+  }
+
+  // reminders today
+  const reminderToday=pending.filter(t=>t.reminder===td);
+  if(reminderToday.length){
+    html+=`<div class="card"><div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;">🔔 Reminders Today</div>`;
+    reminderToday.forEach(t=>{
+      html+=`<div class="ai accent">
+        <div class="ai-title">${esc(t.title)}</div>
+        <div class="ai-sub">Due: ${fmt(t.due)} · 👤 ${esc(t.assigned)}</div>
+      </div>`;
+    });
+    html+='</div>';
+  }
+
+  // upcoming events (7 days)
+  if(upcomingEvt.length){
+    html+=`<div class="card"><div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;">📅 Events This Week</div>`;
+    upcomingEvt.forEach(e=>{
+      const d=daysUntil(e.date);
+      const cls=d===0?'danger':d<=2?'warn':'accent';
+      html+=`<div class="ai ${cls}">
+        <div class="ai-title">${EVT_IC[e.type]||'📌'} ${esc(e.title)}</div>
+        <div class="ai-sub">${fmt(e.date)} · ${fmtT(e.time)}${e.location?' · 📍'+esc(e.location):''} · <strong style="color:var(--${cls})">${d===0?'TODAY':d===1?'Tomorrow':'In '+d+'d'}</strong></div>
+      </div>`;
+    });
+    html+='</div>';
+  }
+
+  // today's calls
+  if(todayCalls.length){
+    html+=`<div class="card"><div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;">📞 Calls Today</div>`;
+    todayCalls.forEach(c=>{
+      html+=`<div class="ai cyan">
+        <div class="ai-title">📞 ${esc(c.name)}</div>
+        <div class="ai-sub">${esc(c.purpose)} · ${fmtT(c.time)}${c.phone?' · 📱'+esc(c.phone):''}</div>
+        <div style="margin-top:8px;">
+          <button class="btn bs bsuc" onclick="markCallDone('${c.id}')">✓ Done</button>
+        </div>
+      </div>`;
+    });
+    html+='</div>';
+  }
+
+  // due soon (1-3 days)
+  if(dueSoon.length){
+    html+=`<div class="card"><div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;">⚡ Due in 1–3 Days</div>`;
+    dueSoon.forEach(t=>{
+      html+=`<div class="ai warn">
+        <div class="ai-title">${esc(t.title)}</div>
+        <div class="ai-sub">${fmtDiff(t.due)} · 👤 ${esc(t.assigned)}
+          ${t.rescheduled?` <span class="rs-badge">Rescheduled ×${t.rescheduleCount||1}</span>`:''}
+        </div>
+      </div>`;
+    });
+    html+='</div>';
+  }
+
+  if(!overdue.length&&!dueToday.length&&!reminderToday.length&&!upcomingEvt.length&&!todayCalls.length&&!dueSoon.length&&!rescheduled.length){
+    html=`<div class="empty"><span class="empty-ico">🎉</span>All clear! No urgent tasks or events today.<br><span style="font-size:12px;">Tap ＋ to add tasks, events or calls.</span></div>`;
+  }
+
+  document.getElementById('dContent').innerHTML=html;
+}
+
+// ── TASKS ──
+function renderTasks(){
+  const pending=D.tasks.filter(t=>t.status!=='done');
+  const overdue=pending.filter(t=>isOverdue(t.due));
+
+  // apply filter
+  let filtered=pending;
+  if(tFilter==='overdue')          filtered=pending.filter(t=>isOverdue(t.due));
+  else if(tFilter==='today')       filtered=pending.filter(t=>isToday(t.due));
+  else if(tFilter==='soon')        filtered=pending.filter(t=>isSoon(t.due));
+  else if(tFilter==='rescheduled') filtered=pending.filter(t=>t.rescheduled);
+  else if(tFilter==='grouped')     filtered=pending.filter(t=>t.groupId);
+  else if(isPersonFilter(tFilter)){
+    const person=personFromFilter(tFilter);
+    filtered=pending.filter(t=>t.assigned&&t.assigned.trim()===person);
+  }
+
+  // subtitle — if person filter, show their task count + overdue
+  if(isPersonFilter(tFilter)){
+    const person=personFromFilter(tFilter);
+    const pOver=filtered.filter(t=>isOverdue(t.due));
+    document.getElementById('tSub').textContent=
+      `${filtered.length} task${filtered.length!==1?'s':''} assigned to ${person} · ${pOver.length} overdue`;
+  } else {
+    document.getElementById('tSub').textContent=`${pending.length} pending · ${overdue.length} overdue`;
+  }
+
+  // chips — base filters + divider label + one chip per person
+  const personFilters=getPersonFilters();
+  const allChips=[...BASE_FILTERS];
+  const chipsHtml=BASE_FILTERS.map(f=>
+    `<div class="chip${tFilter===f.k?' active':''}" onclick="setTFilter('${f.k}')">${f.label}</div>`
+  ).join('')
+  +(personFilters.length
+    ? `<div style="width:1px;background:var(--border);flex-shrink:0;margin:0 4px;"></div>`
+      + personFilters.map(f=>{
+          const pPending=pending.filter(t=>t.assigned&&t.assigned.trim()===personFromFilter(f.k));
+          const pOver=pPending.filter(t=>isOverdue(t.due));
+          const badge=pPending.length?` <span style="background:rgba(14,165,233,.25);border-radius:10px;padding:1px 6px;font-size:10px;">${pPending.length}${pOver.length?` <span style="color:var(--danger);">· ${pOver.length}⚠</span>`:''}</span>`:'';
+          return `<div class="chip${tFilter===f.k?' active':''}" onclick="setTFilter('${f.k}')">${f.label}${badge}</div>`;
+        }).join('')
+    : '');
+  document.getElementById('tChips').innerHTML=chipsHtml;
+
+  // group tasks by master group
+  const groups={};
+  D.groups.forEach(g=>{groups[g.id]={g,tasks:[]};});
+  groups['__none']={g:null,tasks:[]};
+  filtered.forEach(t=>{
+    if(t.groupId&&groups[t.groupId])groups[t.groupId].tasks.push(t);
+    else groups['__none'].tasks.push(t);
+  });
+
+  let html='';
+  html+=`<div style="display:flex;justify-content:flex-end;margin-bottom:10px;gap:8px;">
+    <button class="btn bs bg" onclick="openGroupModal()">📁 New Group</button>
+    <button class="btn bs bp" onclick="openTaskModal()">＋ Add Task</button>
+  </div>`;
+
+  // if person filter active, show a summary header
+  if(isPersonFilter(tFilter)){
+    const person=personFromFilter(tFilter);
+    const pOver=filtered.filter(t=>isOverdue(t.due));
+    const pToday=filtered.filter(t=>isToday(t.due));
+    html+=`<div style="background:rgba(14,165,233,.07);border:1px solid rgba(14,165,233,.2);border-radius:12px;padding:13px 15px;margin-bottom:14px;">
+      <div style="font-size:14px;font-weight:700;color:var(--accent);margin-bottom:6px;">👤 ${esc(person)}</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;font-size:12px;color:var(--text2);">
+        <span>${filtered.length} task${filtered.length!==1?'s':''} total</span>
+        ${pOver.length?`<span style="color:var(--danger);font-weight:600;">· ${pOver.length} overdue</span>`:''}
+        ${pToday.length?`<span style="color:var(--warn);font-weight:600;">· ${pToday.length} due today</span>`:''}
+      </div>
+    </div>`;
+  }
+
+  let hasAny=false;
+  Object.values(groups).forEach(({g,tasks})=>{
+    if(!tasks.length)return;
+    hasAny=true;
+    if(g){
+      html+=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;margin-top:4px;">
+        <span style="font-size:14px;font-weight:700;color:var(--accent);">📁 ${esc(g.name)}</span>
+        ${g.desc?`<span style="font-size:11.5px;color:var(--text3);">— ${esc(g.desc)}</span>`:''}
+        <span class="tag ta" style="margin-left:auto;">${tasks.length} task${tasks.length>1?'s':''}</span>
+        <button class="btn bs bp" onclick="openTaskModal('${g.id}')" style="padding:5px 10px;font-size:11px;">＋</button>
+      </div>`;
+    }
+    tasks.forEach(t=>{ html+=taskCard(t); });
+    if(g) html+=`<div style="height:6px;"></div>`;
+  });
+
+  if(!hasAny){
+    const emptyMsg=isPersonFilter(tFilter)
+      ?`No tasks assigned to ${esc(personFromFilter(tFilter))}.`
+      :tFilter==='all'?'No pending tasks! Great work.':'No tasks match this filter.';
+    html+=`<div class="empty"><span class="empty-ico">✅</span>${emptyMsg}</div>`;
+  }
+
+  document.getElementById('tList').innerHTML=html;
+}
+
+function taskCard(t){
+  const over=isOverdue(t.due);
+  const td=isToday(t.due);
+  const g=D.groups.find(x=>x.id===t.groupId);
+  const rowCls=over?'overdue':(t.rescheduled?'rescheduled-row':'priority-'+t.priority);
+  return `<div class="tr ${rowCls}">
+    <div class="tr-name">${esc(t.title)}
+      ${t.rescheduled?`<span class="rs-badge" style="margin-left:6px;">📅 Moved ×${t.rescheduleCount||1}</span>`:''}
+    </div>
+    <div class="tr-meta">
+      <span class="tr-meta-i">👤 ${esc(t.assigned)}</span>
+      <span class="tr-meta-i" style="color:${over?'var(--danger)':td?'var(--warn)':'var(--text2)'}">📅 ${fmt(t.due)}</span>
+      ${t.reminder?`<span class="tr-meta-i">🔔 ${fmt(t.reminder)}</span>`:''}
+      ${g?`<span class="tr-meta-i tag ta">📁 ${esc(g.name)}</span>`:''}
+      ${(t.updates&&t.updates.length)?`<span class="tr-meta-i tag ts">💬 ${t.updates.length}</span>`:''}
+      ${priorityTag(t.priority)}
+      ${over?tagHTML('td',fmtDiff(t.due)):td?tagHTML('tw','Due Today'):''}
+    </div>
+    ${t.notes?`<div style="font-size:12px;color:var(--text3);margin-top:5px;font-style:italic;">${esc(t.notes)}</div>`:''}
+    <div class="tr-actions">
+      <button class="btn bs bwrn" onclick="openReschedule('${t.id}')">📅 Reschedule</button>
+      <button class="btn bs bacc" onclick="openUpdates('${t.id}')">💬 Updates</button>
+      <button class="btn bs bg" onclick="openEditTask('${t.id}')">✏️ Edit</button>
+      <button class="btn bs bsuc" onclick="markTaskDone('${t.id}')">✓ Done</button>
+    </div>
+  </div>`;
+}
+
+function setTFilter(f){tFilter=f;render();}
+
+// ── GROUPS ──
+function renderGroups(){
+  let html=`<div style="display:flex;justify-content:flex-end;margin-bottom:12px;">
+    <button class="btn bs bp" onclick="openGroupModal()">＋ New Group</button>
+  </div>`;
+
+  if(!D.groups.length){
+    html+=`<div class="empty"><span class="empty-ico">📁</span>No groups yet.<br>Create a project group to organise multiple tasks under one umbrella.</div>`;
+  } else {
+    D.groups.forEach(g=>{
+      const tasks=D.tasks.filter(t=>t.groupId===g.id&&t.status!=='done');
+      const over=tasks.filter(t=>isOverdue(t.due));
+      html+=`<div class="gc">
+        <div class="ghdr">
+          <div>
+            <div class="gn">📁 ${esc(g.name)}</div>
+            ${g.desc?`<div style="font-size:12px;color:var(--text3);margin-top:2px;">${esc(g.desc)}</div>`:''}
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span class="tag ta">${tasks.length} task${tasks.length!==1?'s':''}</span>
+            ${over.length?`<span class="tag td">${over.length} overdue</span>`:''}
+            <button class="btn bs bp" style="padding:6px 11px;font-size:11.5px;" onclick="openTaskModal('${g.id}')">＋ Task</button>
+            <button class="btn bs bg" onclick="openGroupModal('${g.id}')">✏️</button>
+            <button class="btn bs bdng" onclick="deleteGroup('${g.id}')">🗑</button>
+          </div>
+        </div>
+        <div class="gbody">
+          ${tasks.length?tasks.map(t=>`
+            <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:11px 13px;margin-bottom:8px;border-left:3px solid var(--${PRI_C[t.priority]||'accent'});">
+              <div style="font-size:13.5px;font-weight:600;margin-bottom:4px;">${esc(t.title)}${t.rescheduled?` <span class="rs-badge" style="font-size:10px;">📅 Moved</span>`:''}</div>
+              <div style="font-size:12px;color:var(--text2);display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
+                <span>👤 ${esc(t.assigned)}</span>
+                <span style="color:${isOverdue(t.due)?'var(--danger)':isToday(t.due)?'var(--warn)':'inherit'}">📅 ${fmt(t.due)}</span>
+                ${priorityTag(t.priority)}
+                ${isOverdue(t.due)?tagHTML('td',fmtDiff(t.due)):''}
+              </div>
+              <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;">
+                <button class="btn bs bwrn" style="font-size:11px;" onclick="openReschedule('${t.id}')">📅 Reschedule</button>
+                <button class="btn bs bsuc" style="font-size:11px;" onclick="markTaskDone('${t.id}')">✓ Done</button>
+              </div>
+            </div>`).join('')
+          :'<div style="font-size:13px;color:var(--text3);font-style:italic;">No tasks yet. Tap ＋ Task to add.</div>'}
+        </div>
+      </div>`;
+    });
+  }
+  document.getElementById('gList').innerHTML=html;
+}
+
+// ── EVENTS ──
+function renderEvents(){
+  const td=today();
+  const upcoming=D.events.filter(e=>e.date>=td).sort((a,b)=>a.date.localeCompare(b.date));
+  const past=D.events.filter(e=>e.date<td);
+  document.getElementById('eSub').textContent=`${upcoming.length} upcoming · ${past.length} past (auto-archived)`;
+
+  let html=`<div style="display:flex;justify-content:flex-end;margin-bottom:12px;">
+    <button class="btn bs bp" onclick="openEventModal()">＋ Add Event</button>
+  </div>`;
+
+  if(!upcoming.length){
+    html+=`<div class="empty"><span class="empty-ico">📅</span>No upcoming events.<br>Add conferences, meetings, surgeries and more.</div>`;
+  } else {
+    upcoming.forEach(e=>{
+      const d=daysUntil(e.date);
+      const ec=EVT_C[e.type]||'var(--accent)';
+      const urgTag=d===0?tagHTML('td','Today!'):d===1?tagHTML('tw','Tomorrow'):d<=7?tagHTML('ta',`In ${d}d`):tagHTML('tm',`In ${d}d`);
+      const reminder7=d>0&&d<=7?`<span style="background:rgba(245,158,11,.12);color:var(--warn);font-size:10.5px;font-weight:700;border-radius:20px;padding:3px 8px;border:1px solid rgba(245,158,11,.25);">⚠️ Reminder Active</span>`:'';
+      html+=`<div class="ec" style="border-left-color:${ec};">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
+          <div style="flex:1;">
+            <div class="et">${EVT_IC[e.type]||'📌'} ${esc(e.title)}</div>
+            <div class="em">
+              <span>📅 ${fmt(e.date)}</span>
+              <span>🕐 ${fmtT(e.time)}</span>
+              ${e.location?`<span>📍 ${esc(e.location)}</span>`:''}
+              ${urgTag} ${reminder7}
+            </div>
+            ${e.notes?`<div style="font-size:12px;color:var(--text3);margin-top:6px;font-style:italic;">${esc(e.notes)}</div>`:''}
+          </div>
+          <div style="display:flex;gap:6px;flex-shrink:0;">
+            <button class="btn bs bg" onclick="openEventModal('${e.id}')">✏️</button>
+            <button class="btn bs bdng" onclick="deleteEvent('${e.id}')">🗑</button>
+          </div>
+        </div>
+      </div>`;
+    });
+  }
+  document.getElementById('eList').innerHTML=html;
+}
+
+// ── CALLS ──
+function renderCalls(){
+  const pending=D.calls.filter(c=>c.status!=='done').sort((a,b)=>a.date.localeCompare(b.date)||a.time.localeCompare(b.time));
+  const done=D.calls.filter(c=>c.status==='done').slice(-8);
+  const td=today();
+  document.getElementById('cSub').textContent=`${pending.length} pending · ${D.calls.filter(c=>c.date===td&&c.status!=='done').length} today`;
+
+  let html=`<div style="display:flex;justify-content:flex-end;margin-bottom:12px;">
+    <button class="btn bs bp" onclick="openCallModal()">＋ Schedule Call</button>
+  </div>`;
+
+  if(!pending.length){
+    html+=`<div class="empty"><span class="empty-ico">📞</span>No pending calls.<br>Schedule important calls here.</div>`;
+  } else {
+    pending.forEach(c=>{
+      const over=c.date<td;
+      const ct=c.date===td;
+      const cls=over?'danger':ct?'warn':'accent';
+      html+=`<div class="cc" style="border-left:3px solid var(--${cls});">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">
+          <div style="flex:1;">
+            <div class="call-name">📞 ${esc(c.name)} ${ct?tagHTML('tw','Today'):over?tagHTML('td','Overdue'):''}</div>
+            <div class="call-purpose">🎯 ${esc(c.purpose)}</div>
+            <div style="font-size:12px;color:var(--text2);display:flex;flex-wrap:wrap;gap:10px;">
+              <span>📅 ${fmt(c.date)}</span>
+              <span>🕐 ${fmtT(c.time)}</span>
+              ${c.phone?`<span style="color:var(--accent);">📱 ${esc(c.phone)}</span>`:''}
+            </div>
+            ${c.notes?`<div style="font-size:12px;color:var(--text3);margin-top:5px;font-style:italic;">${esc(c.notes)}</div>`:''}
+            <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;">
+              <button class="btn bs bsuc" onclick="markCallDone('${c.id}')">✓ Done</button>
+              <button class="btn bs bg" onclick="openCallModal('${c.id}')">✏️ Edit</button>
+            </div>
+          </div>
+        </div>
+      </div>`;
+    });
+  }
+
+  if(done.length){
+    html+=`<div class="done-hdr" onclick="this.nextSibling.classList.toggle('open')">
+      ✅ Recently Completed (${done.length}) <span style="margin-left:auto;">▼</span>
+    </div>
+    <div class="done-items">`;
+    done.reverse().forEach(c=>{
+      html+=`<div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:10px 13px;margin-bottom:7px;opacity:.55;">
+        <div style="font-size:13px;font-weight:600;">✅ ${esc(c.name)}</div>
+        <div style="font-size:11.5px;color:var(--text3);">${esc(c.purpose)} · ${fmt(c.date)} ${fmtT(c.time)}</div>
+      </div>`;
+    });
+    html+='</div>';
+  }
+
+  document.getElementById('cList').innerHTML=html;
+}
+
+// ══════════════════════════════════════
+//  UTILITY
+// ══════════════════════════════════════
+function esc(s){
+  if(!s)return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ══════════════════════════════════════
+//  NOTES
+// ══════════════════════════════════════
+const NOTE_COLORS=['#0EA5E9','#10B981','#F59E0B','#EF4444','#8B5CF6','#06B6D4','#F97316','#EC4899'];
+const NOTE_ICONS =['📝','🧪','💊','🏥','📋','🔬','📊','🧠','❤️','📖','⚕️','🩺','💉','🩻','📌','⭐'];
+let openNoteId=null;
+let nSelColor=NOTE_COLORS[0];
+let nSelIcon=NOTE_ICONS[0];
+
+function openNewNoteModal(){
+  document.getElementById('nEditId').value='';
+  document.getElementById('mNoteTitle').textContent='New Note';
+  document.getElementById('nTitle').value='';
+  nSelColor=NOTE_COLORS[0];
+  nSelIcon=NOTE_ICONS[0];
+  renderColorRow();renderIconRow();
+  openM('note');
+}
+function openEditNoteModal(id){
+  const n=D.notes.find(x=>x.id===id);if(!n)return;
+  document.getElementById('nEditId').value=id;
+  document.getElementById('mNoteTitle').textContent='Edit Note';
+  document.getElementById('nTitle').value=n.title||'';
+  nSelColor=n.color||NOTE_COLORS[0];
+  nSelIcon=n.icon||NOTE_ICONS[0];
+  renderColorRow();renderIconRow();
+  openM('note');
+}
+function renderColorRow(){
+  document.getElementById('nColorRow').innerHTML=NOTE_COLORS.map(c=>
+    `<div class="note-color-btn${nSelColor===c?' sel':''}" style="background:${c};" onclick="nSelColor='${c}';renderColorRow();"></div>`
+  ).join('');
+}
+function renderIconRow(){
+  document.getElementById('nIconRow').innerHTML=NOTE_ICONS.map(ic=>
+    `<div onclick="nSelIcon='${ic}';renderIconRow();" style="font-size:22px;cursor:pointer;padding:4px 6px;border-radius:8px;background:${nSelIcon===ic?'rgba(255,255,255,.1)':'transparent'};transition:background .12s;">${ic}</div>`
+  ).join('');
+}
+function saveNote(){
+  const id=document.getElementById('nEditId').value;
+  const title=document.getElementById('nTitle').value.trim();
+  if(!title)return alert('Please enter a note title.');
+  if(id){
+    const idx=D.notes.findIndex(x=>x.id===id);
+    if(idx>-1){D.notes[idx].title=title;D.notes[idx].color=nSelColor;D.notes[idx].icon=nSelIcon;D.notes[idx].updated=Date.now();}
+  } else {
+    const note={id:uid(),title,color:nSelColor,icon:nSelIcon,pages:[],created:Date.now(),updated:Date.now()};
+    D.notes.push(note);
+  }
+  save();closeM('note');renderNotes();
+}
+function deleteNote(id){
+  cfm('Delete Note','This note and all its pages will be permanently deleted.','Delete Note','bdng',()=>{
+    D.notes=D.notes.filter(x=>x.id!==id);
+    openNoteId=null;
+    save();renderNotes();
+  });
+}
+
+// Pages
+function openAddPageModal(noteId,editPageId){
+  document.getElementById('pgNoteId').value=noteId;
+  document.getElementById('pgEditId').value=editPageId||'';
+  if(editPageId){
+    const n=D.notes.find(x=>x.id===noteId);
+    const pg=n&&n.pages.find(x=>x.id===editPageId);
+    document.getElementById('mPageTitle').textContent='Edit Page';
+    document.getElementById('pgHeading').value=pg?pg.heading:'';
+    document.getElementById('pgContent').value=pg?pg.content:'';
+  } else {
+    document.getElementById('mPageTitle').textContent='Add Page';
+    document.getElementById('pgHeading').value='';
+    document.getElementById('pgContent').value='';
+  }
+  openM('page');
+}
+function savePage(){
+  const noteId=document.getElementById('pgNoteId').value;
+  const editId=document.getElementById('pgEditId').value;
+  const heading=document.getElementById('pgHeading').value.trim();
+  const content=document.getElementById('pgContent').value.trim();
+  if(!heading)return alert('Please enter a page heading.');
+  if(!content)return alert('Please enter some content.');
+  const n=D.notes.find(x=>x.id===noteId);if(!n)return;
+  if(editId){
+    const idx=n.pages.findIndex(x=>x.id===editId);
+    if(idx>-1){n.pages[idx].heading=heading;n.pages[idx].content=content;n.pages[idx].updated=Date.now();}
+  } else {
+    n.pages.push({id:uid(),heading,content,created:Date.now()});
+  }
+  n.updated=Date.now();
+  save();closeM('page');openNote(noteId);
+}
+function deletePage(noteId,pageId){
+  cfm('Delete Page','This page will be permanently removed from the note.','Delete Page','bdng',()=>{
+    const n=D.notes.find(x=>x.id===noteId);
+    if(n){n.pages=n.pages.filter(x=>x.id!==pageId);n.updated=Date.now();}
+    save();openNote(noteId);
+  });
+}
+function movePageUp(noteId,pageId){
+  const n=D.notes.find(x=>x.id===noteId);if(!n)return;
+  const i=n.pages.findIndex(x=>x.id===pageId);
+  if(i>0){[n.pages[i-1],n.pages[i]]=[n.pages[i],n.pages[i-1]];n.updated=Date.now();save();openNote(noteId);}
+}
+function movePageDown(noteId,pageId){
+  const n=D.notes.find(x=>x.id===noteId);if(!n)return;
+  const i=n.pages.findIndex(x=>x.id===pageId);
+  if(i<n.pages.length-1){[n.pages[i],n.pages[i+1]]=[n.pages[i+1],n.pages[i]];n.updated=Date.now();save();openNote(noteId);}
+}
+
+// Open a note (show detail view)
+function openNote(id){
+  openNoteId=id;
+  const n=D.notes.find(x=>x.id===id);if(!n)return;
+  document.getElementById('notesIndex').style.display='none';
+  const detail=document.getElementById('noteDetail');
+  detail.classList.add('open');
+
+  let pagesHtml=n.pages.length?n.pages.map((pg,i)=>`
+    <div class="note-page-block">
+      <div class="note-page-heading">
+        <span>${esc(pg.heading)}</span>
+        <div style="display:flex;gap:6px;align-items:center;">
+          ${i>0?`<button class="btn bs bg" style="padding:4px 9px;font-size:12px;" onclick="movePageUp('${n.id}','${pg.id}')">↑</button>`:''}
+          ${i<n.pages.length-1?`<button class="btn bs bg" style="padding:4px 9px;font-size:12px;" onclick="movePageDown('${n.id}','${pg.id}')">↓</button>`:''}
+          <button class="btn bs bg" style="padding:4px 9px;font-size:12px;" onclick="openAddPageModal('${n.id}','${pg.id}')">✏️</button>
+          <button class="btn bs bdng" style="padding:4px 9px;font-size:12px;" onclick="deletePage('${n.id}','${pg.id}')">🗑</button>
+        </div>
+      </div>
+      <div class="note-page-content">${esc(pg.content)}</div>
+      <div style="font-size:10.5px;color:var(--text3);margin-top:10px;">Added ${fmtAgo(pg.created)}${pg.updated?' · Edited '+fmtAgo(pg.updated):''}</div>
+    </div>`).join('')
+  :`<div class="empty"><span class="empty-ico">📄</span>No pages yet.<br>Tap "Add Page" to write your first section.</div>`;
+
+  detail.innerHTML=`
+    <div style="position:sticky;top:0;z-index:79;background:rgba(8,15,30,.95);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--border);padding:12px 16px 10px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button class="btn bs bg" style="padding:7px 13px;font-size:13px;flex-shrink:0;" onclick="backToNoteIndex()">← Back</button>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:18px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${n.icon} ${esc(n.title)}</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:1px;">${n.pages.length} page${n.pages.length!==1?'s':''} · Updated ${fmtAgo(n.updated)}</div>
+        </div>
+        <button class="btn bs bg" style="padding:7px 12px;font-size:13px;flex-shrink:0;" onclick="openEditNoteModal('${n.id}')">✏️</button>
+        <button class="btn bs bdng" style="padding:7px 12px;font-size:12px;flex-shrink:0;" onclick="deleteNote('${n.id}')">🗑</button>
+      </div>
+    </div>
+    <div style="padding:14px 16px;">
+      <!-- TABLE OF CONTENTS -->
+      ${n.pages.length>1?`
+      <div style="background:rgba(14,165,233,.06);border:1px solid rgba(14,165,233,.15);border-radius:12px;padding:13px 15px;margin-bottom:16px;">
+        <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:9px;">📋 Contents</div>
+        ${n.pages.map((pg,i)=>`<div style="font-size:13px;color:var(--accent);padding:4px 0;border-bottom:1px solid rgba(14,165,233,.08);">
+          <span style="color:var(--text3);margin-right:8px;">${String(i+1).padStart(2,'0')}</span>${esc(pg.heading)}
+        </div>`).join('')}
+      </div>`:''}
+      ${pagesHtml}
+      <button class="btn bp bfull" style="margin-top:6px;" onclick="openAddPageModal('${n.id}')">＋ Add Page</button>
+    </div>`;
+}
+function backToNoteIndex(){
+  openNoteId=null;
+  document.getElementById('notesIndex').style.display='';
+  document.getElementById('noteDetail').classList.remove('open');
+  document.getElementById('noteDetail').innerHTML='';
+  renderNotes();
+}
+
+// Render notes index
+function renderNotes(){
+  if(openNoteId){openNote(openNoteId);return;}
+  document.getElementById('notesIndex').style.display='';
+  document.getElementById('noteDetail').classList.remove('open');
+  document.getElementById('notesSub').textContent=`${D.notes.length} note${D.notes.length!==1?'s':''}`;
+  const sorted=[...D.notes].sort((a,b)=>(b.updated||0)-(a.updated||0));
+  if(!sorted.length){
+    document.getElementById('notesIndexList').innerHTML=`<div class="empty"><span class="empty-ico">📝</span>No notes yet.<br>Tap ＋ to create your first note with pages and headings.</div>`;
+    return;
+  }
+  document.getElementById('notesIndexList').innerHTML=sorted.map(n=>{
+    const preview=n.pages.length?n.pages[0].content.slice(0,80)+'…':'No pages yet';
+    const firstHeading=n.pages.length?n.pages[0].heading:'';
+    return `<div class="note-card" style="border-left-color:${n.color||'var(--accent)'};" onclick="openNote('${n.id}')">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+        <span style="font-size:20px;">${n.icon||'📝'}</span>
+        <div class="note-card-title">${esc(n.title)}</div>
+        <span style="margin-left:auto;font-size:11px;color:var(--text3);">${n.pages.length}p</span>
+      </div>
+      ${firstHeading?`<div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:3px;">§ ${esc(firstHeading)}</div>`:''}
+      <div class="note-card-preview">${esc(preview)}</div>
+      <div class="note-card-meta">
+        <span>Updated ${fmtAgo(n.updated||n.created)}</span>
+        <span>·</span>
+        <span>${n.pages.length} page${n.pages.length!==1?'s':''}</span>
+        <button class="btn bs bg" style="margin-left:auto;font-size:11px;padding:4px 10px;" onclick="event.stopPropagation();openEditNoteModal('${n.id}')">✏️ Edit</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// Time-ago helper
+function fmtAgo(ts){
+  if(!ts)return '—';
+  const diff=Date.now()-ts;
+  const mins=Math.floor(diff/60000);
+  if(mins<1)return 'just now';
+  if(mins<60)return `${mins}m ago`;
+  const hrs=Math.floor(mins/60);
+  if(hrs<24)return `${hrs}h ago`;
+  const days=Math.floor(hrs/24);
+  if(days<7)return `${days}d ago`;
+  return fmt(new Date(ts).toISOString().split('T')[0]);
+}
+
+// ══════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════
+render();
+// Auto-refresh sync indicator label
+setInterval(()=>{
+  if(curView==='dash') renderDash();
+  if(syncMode==='sheets' && API_URL && _lastSyncTs){
+    setSyncStatus('ok','Synced ' + fmtAgo(_lastSyncTs));
+  }
+}, 60000);
+// Pull fresh data from sheet every 5 min if on sheets mode
+setInterval(()=>{
+  if(syncMode==='sheets' && API_URL) pullFromSheets();
+}, 300000);
+</script>
+</body>
+</html>
